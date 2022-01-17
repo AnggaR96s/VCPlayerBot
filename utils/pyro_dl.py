@@ -17,11 +17,11 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#https://github.com/pyrogram/pyrogram/blob/4f585c156c1a2c6707793a8ad7f2f111515ca23b/pyrogram/client.py#L492-L518
-#https://github.com/pyrogram/pyrogram/blob/4f585c156c1a2c6707793a8ad7f2f111515ca23b/pyrogram/client.py#L806-1044
+# https://github.com/pyrogram/pyrogram/blob/4f585c156c1a2c6707793a8ad7f2f111515ca23b/pyrogram/client.py#L492-L518
+# https://github.com/pyrogram/pyrogram/blob/4f585c156c1a2c6707793a8ad7f2f111515ca23b/pyrogram/client.py#L806-1044
 
-#Pyrogram downloader modified to suit my needs. 
-#Downloads the file from telegram servers and retures the path of the file without waiting for the whole download to finish.
+# Pyrogram downloader modified to suit my needs.
+# Downloads the file from telegram servers and retures the path of the file without waiting for the whole download to finish.
 #Copyright (C) @subinps
 
 
@@ -44,27 +44,28 @@ from pyrogram.errors import (
     AuthBytesInvalid
 )
 from pyrogram.session import(
-    Auth, 
+    Auth,
     Session
 )
 from pyrogram.file_id import(
-    FileId, 
-    FileType, 
+    FileId,
+    FileType,
     ThumbnailSource
 )
 from pyrogram.file_id import (
-    FileId, 
-    FileType, 
+    FileId,
+    FileType,
     PHOTO_TYPES
 )
 
 
 DEFAULT_DOWNLOAD_DIR = "downloads/"
 
+
 class Downloader():
     def __init__(
         self,
-        ):
+    ):
         super().__init__()
         self.client = bot
 
@@ -77,7 +78,8 @@ class Downloader():
 
         directory, file_name = os.path.split(file_name)
         if not os.path.isabs(file_name):
-            directory = self.client.PARENT_DIR / (directory or DEFAULT_DOWNLOAD_DIR)
+            directory = self.client.PARENT_DIR / \
+                (directory or DEFAULT_DOWNLOAD_DIR)
         if not file_name:
             guessed_extension = self.client.guess_extension(mime_type)
 
@@ -97,18 +99,25 @@ class Downloader():
                 extension = ".unknown"
 
             file_name = "{}_{}_{}{}".format(
-                FileType(file_id_obj.file_type).name.lower(),
-                datetime.fromtimestamp(date or time.time()).strftime("%Y-%m-%d_%H-%M-%S"),
+                FileType(
+                    file_id_obj.file_type).name.lower(),
+                datetime.fromtimestamp(
+                    date or time.time()).strftime("%Y-%m-%d_%H-%M-%S"),
                 self.client.rnd_id(),
-                extension
-            )
-        final_file_path = os.path.abspath(re.sub("\\\\", "/", os.path.join(directory, file_name)))
+                extension)
+        final_file_path = os.path.abspath(
+            re.sub(
+                "\\\\",
+                "/",
+                os.path.join(
+                    directory,
+                    file_name)))
         os.makedirs(directory, exist_ok=True)
         downloaderr = self.handle_download(file_id_obj, final_file_path)
         asyncio.get_event_loop().create_task(downloaderr)
         return final_file_path
-    
-    async def handle_download(self, file_id_obj, final_file_path):  
+
+    async def handle_download(self, file_id_obj, final_file_path):
         try:
             await self.get_file(
                 file_id=file_id_obj,
@@ -227,7 +236,7 @@ class Downloader():
             )
 
             if isinstance(r, raw.types.upload.File):
-                #with tempfile.NamedTemporaryFile("wb", delete=False) as f:
+                # with tempfile.NamedTemporaryFile("wb", delete=False) as f:
                 with open(filename, 'wb') as f:
                     file_name = filename
                     while True:
@@ -274,7 +283,8 @@ class Downloader():
                                 )
                             )
 
-                            if isinstance(r2, raw.types.upload.CdnFileReuploadNeeded):
+                            if isinstance(
+                                    r2, raw.types.upload.CdnFileReuploadNeeded):
                                 try:
                                     await session.send(
                                         raw.functions.upload.ReuploadCdnFile(
@@ -308,8 +318,10 @@ class Downloader():
 
                             # https://core.telegram.org/cdn#verifying-files
                             for i, h in enumerate(hashes):
-                                cdn_chunk = decrypted_chunk[h.limit * i: h.limit * (i + 1)]
-                                assert h.hash == sha256(cdn_chunk).digest(), f"Invalid CDN hash part {i}"
+                                cdn_chunk = decrypted_chunk[h.limit *
+                                                            i: h.limit * (i + 1)]
+                                assert h.hash == sha256(
+                                    cdn_chunk).digest(), f"Invalid CDN hash part {i}"
 
                             f.write(decrypted_chunk)
 
